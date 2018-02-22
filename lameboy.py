@@ -13,13 +13,14 @@ class Display:
         self._cs = cs or (lambda x: x)
         self._rst = rst or (lambda x: x)
         self._dc = dc
-        self._fn = bytearray([0x20])
+        self._fn = bytearray((0x20,))
         buffer = bytearray(504)
-        self.fb = framebuf.FrameBuffer(buffer, 84, 48, framebuf.MVLSB)
+        self.fb = framebuf.FrameBuffer(buffer, 84, 48, framebuf.MONO_VLSB)
         self._buffer = memoryview(buffer)
 
         self.reset()
         self.contrast()
+        self.inverse(0)
 
     def _write(self, data, command=True):
         self._dc(not command)
@@ -50,14 +51,10 @@ class Display:
 
     def update(self):
         self._cs(0)
-        index = 0
-        for page in range(6):
-            self._command[0] = 0x40 | page
-            self._dc(0)
-            self._spi.write(self._command)
-            self._dc(1)
-            self._spi.write(self._buffer[index:index + 84])
-            index += self.width
+        self._dc(0)
+        self._spi.write(self._command)
+        self._dc(1)
+        self._spi.write(self._buffer)
         self._cs(1)
 
 
