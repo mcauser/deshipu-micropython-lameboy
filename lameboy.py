@@ -12,7 +12,7 @@ class Display:
         self._cs = cs or (lambda x: x)
         self._rst = rst or (lambda x: x)
         self._dc = dc
-        self._fn = bytearray((0x20,))
+        self._fn = 0x20
         buffer = bytearray(504)
         self.fb = framebuf.FrameBuffer(buffer, 84, 48, framebuf.MONO_VLSB)
         self._buffer = memoryview(buffer)
@@ -35,10 +35,10 @@ class Display:
 
     def active(self, val):
         if val:
-            self._fn[0] &= ~0x04
+            self._fn &= ~0x04
         else:
-            self._fn[0] |= 0x04
-        self._command(self._fn)
+            self._fn |= 0x04
+        self._command(bytes((self._fn,)))
 
     def inverse(self, val):
         self._command(b'\x0d' if val else b'\x0c')
@@ -46,8 +46,7 @@ class Display:
     def contrast(self, val=63, bias=20, temp=6):
         if not (0 <= val <= 127 and 16 <= bias <= 23 and 4 <= temp <= 7):
             raise ValueError()
-        self._command(bytes((self._fn[0] | 0x01, temp,
-                             bias, 0x80 | val, self._fn[0])))
+        self._command(bytes((self._fn | 1, temp, bias, 0x80 | val, self._fn)))
 
     def update(self):
         self._dc(0)
