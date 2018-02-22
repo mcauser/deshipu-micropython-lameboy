@@ -13,12 +13,20 @@ class Backlight:
 
 
 class Buttons:
+    UP = 0x80
+    LEFT = 0x40
+    DOWN = 0x20
+    RIGHT = 0x10
+    A = 0x08
+    B = 0x04
+    C = 0x01
+
     def __init__(self, i2c, address=0x38):
         self._i2c = i2c
         self._address = address
 
     def get_pressed(self):
-        return self._i2c.readfrom(self._address, 1)[0]
+        return self._i2c.readfrom(self._address, 1)[0] ^ 0xff
 
 
 i2c = I2C(-1, sda=Pin(4), scl=Pin(5))
