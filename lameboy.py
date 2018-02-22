@@ -19,8 +19,6 @@ class Display:
         self._buffer = memoryview(buffer)
 
         self.reset()
-        self.contrast()
-        self.inverse(0)
 
     def _write(self, data, command=True):
         self._dc(not command)
@@ -32,6 +30,9 @@ class Display:
         self._rst(0)
         time.sleep_us(100)
         self._rst(1)
+        time.sleep_us(100)
+        self.contrast()
+        self.inverse(0)
 
     def active(self, val):
         if val:
