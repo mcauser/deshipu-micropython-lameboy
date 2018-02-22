@@ -6,7 +6,6 @@ from machine import SPI, I2C, Pin
 class Display:
     width = 84
     height = 48
-    _command = bytearray((0x40, 0x80))
 
     def __init__(self, spi, dc, rst=None, cs=None):
         self._spi = spi
@@ -20,10 +19,10 @@ class Display:
 
         self.reset()
 
-    def _write(self, data, command=True):
-        self._dc(not command)
+    def _command(self, command):
+        self._dc(0)
         self._cs(0)
-        self._spi.write(data)
+        self._spi.write(command)
         self._cs(1)
 
     def reset(self):
@@ -39,21 +38,21 @@ class Display:
             self._fn[0] &= ~0x04
         else:
             self._fn[0] |= 0x04
-        self._write(self._fn)
+        self._command(self._fn)
 
     def inverse(self, val):
-        self._write(b'\x0d' if val else b'\x0c')
+        self._command(b'\x0d' if val else b'\x0c')
 
     def contrast(self, val=63, bias=20, temp=6):
         if not (0 <= val <= 127 and 16 <= bias <= 23 and 4 <= temp <= 7):
             raise ValueError()
-        for c in (self._fn[0] | 0x01, temp, bias, 0x80 | val, self._fn[0]):
-            self._write(bytes((c,)))
+        self._command(bytes((self._fn[0] | 0x01, temp,
+                             bias, 0x80 | val, self._fn[0])))
 
     def update(self):
-        self._cs(0)
         self._dc(0)
-        self._spi.write(self._command)
+        self._cs(0)
+        self._spi.write(b'\x40\x80')
         self._dc(1)
         self._spi.write(self._buffer)
         self._cs(1)
