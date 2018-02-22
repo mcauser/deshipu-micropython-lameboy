@@ -13,10 +13,9 @@ class Display:
         self._rst = rst or (lambda x: x)
         self._dc = dc
         self._fn = 0x20
-        buffer = bytearray(504)
-        self.fb = framebuf.FrameBuffer(buffer, 84, 48, framebuf.MONO_VLSB)
-        self._buffer = memoryview(buffer)
-
+        self._buffer = bytearray(504)
+        self.fb = framebuf.FrameBuffer(self._buffer, 84, 48,
+                                       framebuf.MONO_VLSB)
         self.reset()
 
     def _command(self, command):
@@ -24,6 +23,7 @@ class Display:
         self._cs(0)
         self._spi.write(command)
         self._cs(1)
+        self._dc(1)
 
     def reset(self):
         self._rst(0)
@@ -88,4 +88,5 @@ i2c = I2C(-1, sda=Pin(4), scl=Pin(5))
 backlight = Backlight(i2c)
 buttons = Buttons(i2c)
 spi = SPI(1, baudrate=10000000)
-display = Display(spi, Pin(2, Pin.OUT), Pin(0, Pin.OUT), Pin(15, Pin.OUT))
+display = Display(spi, Pin(2, Pin.OUT, value=1), Pin(0, Pin.OUT, value=0),
+                  Pin(15, Pin.OUT, value=1))
