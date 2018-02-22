@@ -16,9 +16,10 @@ _FONT = (
 )
 _SALT = const(132)
 
-_BUFFER = memoryview(bytearray(b'\x00\x00\x00\x00\x00\x00\xaa\x00\xaa\x00\xaa'
-                               b'\x00\xff\x55\xff\x55\xff\x55\xff\xff\xff\xff'
-                               b'\xff\xff'))
+_BUFFER = memoryview(bytearray(b'\x00\x00\x00\x00\x00\x00'
+                               b'\x44\x11\x44\x11\x44\x11'
+                               b'\xee\xbb\xee\xbb\xee\xbb'
+                               b'\xff\xff\xff\xff\xff\xff'))
 _TILES = tuple(framebuf.FrameBuffer(_BUFFER[6 * c:6 * c + 6], 8, 6,
                                     framebuf.MONO_HLSB) for c in range(4))
 
